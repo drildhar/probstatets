@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Retention Analytics & Marketing Optimization</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Light Theme Variables */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'SFMono-Regular', Consolas, monospace;
+    --bg-body: #f3f4f6;
+    --bg-card: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-active: #eff6ff;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-tertiary: #9ca3af;
+    --border-color: #e5e7eb;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --success: #10b981;
+    --success-bg: #d1fae5;
+    --warning: #f59e0b;
+    --warning-bg: #fef3c7;
+    --danger: #ef4444;
+    --danger-bg: #fee2e2;
+    --info: #3b82f6;
+    --info-bg: #dbeafe;
+    --purple: #8b5cf6;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Dark Theme Variables */
+      --bg-body: #111827;
+      --bg-card: #1f2937;
+      --bg-secondary: #374151;
+      --bg-active: #1e3a8a;
+      --text-primary: #f9fafb;
+      --text-secondary: #d1d5db;
+      --text-tertiary: #9ca3af;
+      --border-color: #374151;
+      --success-bg: rgba(16, 185, 129, 0.2);
+      --warning-bg: rgba(245, 158, 11, 0.2);
+      --danger-bg: rgba(239, 68, 68, 0.2);
+      --info-bg: rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body { 
+    font-family: var(--font-sans); 
+    color: var(--text-primary); 
+    background: var(--bg-body); 
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+  
+  header { margin-bottom: 32px; text-align: center; position: relative; }
+  .back-link { position: absolute; left: 0; top: 0; text-decoration: none; color: var(--primary); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+  .back-link:hover { color: var(--primary-hover); text-decoration: underline; }
+  header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); margin-top: 24px;}
+  header p { color: var(--text-secondary); font-size: 14px; }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+
+  /* Navigation */
+  .nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; justify-content: center; }
+  .nav-btn { padding: 10px 16px; font-size: 14px; font-weight: 500; font-family: inherit; border: 1px solid var(--border-color); border-radius: 20px; background: var(--bg-card); color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+  .nav-btn:hover { background: var(--bg-secondary); border-color: var(--text-tertiary); }
+  .nav-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: var(--shadow-md); }
+
+  /* Layout & Cards */
+  .step { display: none; animation: fadeIn 0.3s ease-in-out; }
+  .step.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+  .card h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;}
+  
+  .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .card-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+  .card-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+
+  /* Metrics */
+  .metric { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; text-align: center; }
+  .metric-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; }
+  .metric-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+  .metric-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+  /* Typography & Boxes */
+  .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border-color); }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-header h2 { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+
+  .formula-box { background: var(--bg-secondary); border-left: 4px solid var(--info); border-radius: var(--radius-md); padding: 12px 16px; margin: 16px 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .formula-box .eq { font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); }
+
+  .conclusion-box { background: var(--success-bg); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 16px; margin-top: 16px; }
+  .conclusion-box p, .conclusion-box { font-size: 14px; color: var(--text-primary); line-height: 1.6; font-weight: 500; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 8px;}
+  table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; }
+  th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight td { background: var(--info-bg); font-weight: 500; }
+
+  /* Badges */
+  .badge { display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+  .badge-info { background: var(--info-bg); color: var(--info); }
+  .badge-success { background: var(--success-bg); color: var(--success); }
+  .badge-warning { background: var(--warning-bg); color: var(--warning); }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+  /* Forms & Inputs */
+  .ctrl-row { display: flex; align-items: center; gap: 16px; margin: 12px 0; font-size: 14px; padding: 8px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+  .ctrl-label { color: var(--text-primary); font-weight: 500; min-width: 220px; }
+  .ctrl-val { font-weight: 700; color: var(--primary); min-width: 80px; text-align: right; background: var(--bg-card); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); }
+  
+  /* Modern Range Slider */
+  input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--primary); cursor: pointer; margin-top: -6px; box-shadow: var(--shadow-sm); border: 2px solid #fff; }
+  input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: var(--border-color); border-radius: 3px; }
+  input[type=range]:focus { outline: none; }
+
+  canvas { display: block; width: 100%; }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .card-row, .card-row-3, .card-row-4 { grid-template-columns: 1fr; gap: 12px; }
+    .ctrl-row { flex-direction: column; align-items: stretch; gap: 8px; text-align: center; }
+    .ctrl-label { min-width: auto; }
+    .ctrl-val { text-align: center; }
+    .step-header h2 { font-size: 18px; }
+    header h1 { margin-top: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>E-Commerce Retention & Marketing Analytics</h1>
+    <p>Dashboard Simulasi Skala Data, Probabilitas Konversi, dan Kapasitas Server</p>
+  </header>
+
+  <nav class="nav" aria-label="Main Navigation">
+    <button class="nav-btn active" onclick="showStep(0)">1. Skala Data</button>
+    <button class="nav-btn" onclick="showStep(1)">2. Konversi & Bayes</button>
+    <button class="nav-btn" onclick="showStep(2)">3. Loyalitas & Churn</button>
+    <button class="nav-btn" onclick="showStep(3)">4. Estimasi Pasar</button>
+    <button class="nav-btn" onclick="showStep(4)">5. Korelasi Produk</button>
+    <button class="nav-btn" onclick="showStep(5)">6. Kapasitas Server</button>
+  </nav>
+
+  <!-- ===================== STEP 1 ===================== -->
+  <main class="step active" id="s0">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <h2>Desain Database & Skala Pengukuran Data Pelanggan</h2>
+    </div>
+
+    <div class="card-row-4">
+      <div class="metric" style="border-top: 4px solid var(--info);">
+        <div class="metric-label" style="color:var(--info); font-weight:700;">Nominal</div>
+        <div class="metric-value" style="font-size:16px; color:var(--text-primary); margin-top:8px;">Metode Pembayaran</div>
+        <div class="metric-sub">Kategori tanpa urutan</div>
+      </div>
+      <div class="metric" style="border-top: 4px solid var(--success);">
+        <div class="metric-label" style="color:var(--success); font-weight:700;">Ordinal</div>
+        <div class="metric-value" style="font-size:16px; color:var(--text-primary); margin-top:8px;">Tier Loyalitas</div>
+        <div class="metric-sub">Urutan bermakna</div>
+      </div>
+      <div class="metric" style="border-top: 4px solid var(--warning);">
+        <div class="metric-label" style="color:var(--warning); font-weight:700;">Interval</div>
+        <div class="metric-value" style="font-size:16px; color:var(--text-primary); margin-top:8px;">Skor Kepuasan</div>
+        <div class="metric-sub">Jarak bermakna, nol relatif</div>
+      </div>
+      <div class="metric" style="border-top: 4px solid var(--danger);">
+        <div class="metric-label" style="color:var(--danger); font-weight:700;">Rasio</div>
+        <div class="metric-value" style="font-size:16px; color:var(--text-primary); margin-top:8px;">Nilai Transaksi</div>
+        <div class="metric-sub">Nol absolut, bisa ÷</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📊 Struktur Tabel Basis Data Pelanggan</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Field</th><th>Tipe Data</th><th>Skala</th><th>Operasi Valid</th><th>Contoh Nilai</th></tr></thead>
+          <tbody>
+            <tr><td>customer_id</td><td>VARCHAR</td><td><span class="badge badge-info">Nominal</span></td><td>= , ≠</td><td>USR-00142</td></tr>
+            <tr><td>payment_method</td><td>ENUM</td><td><span class="badge badge-info">Nominal</span></td><td>Mode, frekuensi</td><td>e-wallet, kartu kredit</td></tr>
+            <tr><td>loyalty_tier</td><td>ENUM</td><td><span class="badge badge-success">Ordinal</span></td><td>&lt; &gt; , Median</td><td>Bronze → Silver → Gold</td></tr>
+            <tr><td>satisfaction_score</td><td>TINYINT</td><td><span class="badge badge-warning">Interval</span></td><td>Mean, Std Dev</td><td>7 (dari skala 1–10)</td></tr>
+            <tr><td>monthly_spend</td><td>DECIMAL(12,2)</td><td><span class="badge badge-danger">Rasio</span></td><td>Semua operasi</td><td>Rp 485.000</td></tr>
+            <tr><td>total_orders</td><td>INT</td><td><span class="badge badge-danger">Rasio</span></td><td>Semua operasi</td><td>23 pesanan</td></tr>
+            <tr class="highlight"><td>customer_ltv</td><td>DECIMAL(14,2)</td><td><span class="badge badge-info">Rasio</span></td><td>E[X], Var(X)</td><td>Rp 8.750.000 (dihitung)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-row">
+      <div class="card" style="margin-bottom:0;">
+        <h3>Distribusi Tier Loyalitas (n = 10.000)</h3>
+        <div style="position:relative;height:220px"><canvas id="tierChart"></canvas></div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <h3>Distribusi Metode Pembayaran</h3>
+        <div style="position:relative;height:220px"><canvas id="pmChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <strong>Implikasi Analisis:</strong> Hanya data <em>Rasio</em> (pengeluaran, jumlah order) yang dapat digunakan langsung dalam perhitungan nilai harapan <span class="eq">E[X] = Σxᵢ·P(xᵢ)</span> dan <em>Customer Lifetime Value (CLV)</em>. Data <em>Ordinal</em> (tier loyalitas) memerlukan konversi ke skor numerik untuk model regresi.
+    </div>
+  </main>
+
+  <!-- ===================== STEP 2 ===================== -->
+  <main class="step" id="s1">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <h2>Analisis Probabilitas Konversi Pemasaran</h2>
+    </div>
+
+    <div class="card">
+      <h3>🎟️ Bagian A — Aturan Perkalian: Kapasitas Kode Promo Unik</h3>
+      <div class="ctrl-row"><span class="ctrl-label">Huruf kategori (A-Z)</span><input type="range" min="1" max="5" step="1" value="3" id="prA" oninput="updPromo()"><span class="ctrl-val" id="prA-v">3</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">Digit angka unik (0-9)</span><input type="range" min="2" max="8" step="1" value="4" id="prB" oninput="updPromo()"><span class="ctrl-val" id="prB-v">4</span></div>
+      
+      <div class="card-row-3" style="margin-top:20px; margin-bottom:0;">
+        <div class="metric"><div class="metric-label">Kombinasi Huruf (26ᵏ)</div><div class="metric-value" id="pA">17.576</div><div class="metric-sub">Variasi prefiks</div></div>
+        <div class="metric"><div class="metric-label">Kombinasi Angka (10ᵈ)</div><div class="metric-value" id="pB">10.000</div><div class="metric-sub">Variasi sufiks</div></div>
+        <div class="metric" style="border-color:var(--info);"><div class="metric-label" style="color:var(--info);">Total Kode Unik</div><div class="metric-value" id="pC">175.760.000</div><div class="metric-sub">Kapasitas maksimal</div></div>
+      </div>
+      
+      <div class="formula-box" style="margin-top:16px;">
+        <span class="eq">Total Kapasitas = 26ᵏ × 10ᵈ</span><br>
+        Contoh: Kode "ELK-7823" → Kategori Elektronik (3 huruf), 4 digit angka unik.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔔 Bagian B — Teorema Bayes: Peluang Konversi Notifikasi Push</h3>
+      <div class="ctrl-row"><span class="ctrl-label">P(Buka notifikasi)</span><input type="range" min="5" max="80" step="1" value="40" id="bOpen" oninput="updBayes2()"><span class="ctrl-val" id="bOpen-v">40%</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">P(Beli | Buka notif)</span><input type="range" min="5" max="70" step="1" value="35" id="bBuyO" oninput="updBayes2()"><span class="ctrl-val" id="bBuyO-v">35%</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">P(Beli | Abaikan notif)</span><input type="range" min="1" max="30" step="1" value="8" id="bBuyN" oninput="updBayes2()"><span class="ctrl-val" id="bBuyN-v">8%</span></div>
+
+      <div class="card-row-3" style="margin-top:20px; margin-bottom:0;">
+        <div class="metric"><div class="metric-label">P(Beli) Total</div><div class="metric-value" id="bPbuy">—</div><div class="metric-sub">Probabilitas marginal</div></div>
+        <div class="metric" style="background:var(--danger-bg); border-color:rgba(239, 68, 68, 0.3);"><div class="metric-label" style="color:var(--danger);">P(Buka | Beli) Posterior</div><div class="metric-value" id="bPost" style="color:var(--danger);">—</div><div class="metric-sub">Teorema Bayes</div></div>
+        <div class="metric" style="background:var(--success-bg); border-color:rgba(16, 185, 129, 0.3);"><div class="metric-label" style="color:var(--success);">Lift Konversi Pemasaran</div><div class="metric-value" id="bLift" style="color:var(--success);">—</div><div class="metric-sub">Efektivitas Notifikasi</div></div>
+      </div>
+
+      <div class="formula-box" id="bayes2-fb" style="margin-top:16px;"></div>
+      
+      <div style="position:relative;height:250px;margin-top:20px"><canvas id="bayesChart2"></canvas></div>
+    </div>
+  </main>
+
+  <!-- ===================== STEP 3 ===================== -->
+  <main class="step" id="s2">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <h2>Pemodelan Loyalitas & Aktivasi Pelanggan</h2>
+    </div>
+
+    <div class="card">
+      <h3>⏳ Distribusi Geometrik — Waktu Hingga Transaksi Pertama</h3>
+      <div class="ctrl-row"><span class="ctrl-label">P(Transaksi pertama / bulan)</span><input type="range" min="5" max="60" step="1" value="30" id="geoP" oninput="updGeo()"><span class="ctrl-val" id="geoP-v">0.30</span></div>
+      
+      <div class="card-row-3" style="margin-top:20px; margin-bottom:0;">
+        <div class="metric"><div class="metric-label">Ekspektasi E[X]</div><div class="metric-value" id="gEX">—</div><div class="metric-sub">Rata-rata bulan aktivasi</div></div>
+        <div class="metric"><div class="metric-label">Varians Var(X)</div><div class="metric-value" id="gVar">—</div><div class="metric-sub">Sebaran waktu (bulan)</div></div>
+        <div class="metric"><div class="metric-label">P(Aktif ≤ 3 bulan)</div><div class="metric-value" id="gCDF3">—</div><div class="metric-sub">Peluang kumulatif</div></div>
+      </div>
+      
+      <div style="position:relative;height:250px;margin-top:20px"><canvas id="geoChart"></canvas></div>
+      
+      <div class="formula-box" style="margin-top:16px;">
+        <span class="eq">P(X = k) = (1-p)ᵏ⁻¹ × p</span><br>
+        Bulan ke-k adalah bulan transaksi pertama sejak registrasi. Semakin kecil p, semakin lama rata-rata waktu onboarding pengguna baru.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🏆 Distribusi Binomial Negatif — Waktu Hingga Menjadi Loyal</h3>
+      <div class="ctrl-row"><span class="ctrl-label">Target pembelian sukses (k)</span><input type="range" min="2" max="15" step="1" value="5" id="nbK" oninput="updNB()"><span class="ctrl-val" id="nbK-v">5</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">P(Pembelian tiap bulan)</span><input type="range" min="10" max="70" step="1" value="40" id="nbP" oninput="updNB()"><span class="ctrl-val" id="nbP-v">0.40</span></div>
+      
+      <div class="card-row-3" style="margin-top:20px; margin-bottom:0;">
+        <div class="metric"><div class="metric-label">Ekspektasi E[X]</div><div class="metric-value" id="nbEX">—</div><div class="metric-sub">Bulan mencapai tier VIP</div></div>
+        <div class="metric"><div class="metric-label">Varians Var(X)</div><div class="metric-value" id="nbVar">—</div><div class="metric-sub">Sebaran data</div></div>
+        <div class="metric"><div class="metric-label">Estimasi Median</div><div class="metric-value" id="nbMed">—</div><div class="metric-sub">Bulan realistis dicapai</div></div>
+      </div>
+      
+      <div style="position:relative;height:250px;margin-top:20px"><canvas id="nbChart"></canvas></div>
+      
+      <div class="formula-box" style="margin-top:16px;">
+        <span class="eq">P(X=n) = C(n-1, k-1) × pᵏ × (1-p)ⁿ⁻ᵏ</span><br>
+        Digunakan untuk memprediksi probabilitas seorang pengguna mencapai tier loyalitas tinggi (misal: Gold/Platinum yang butuh k transaksi).
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== STEP 4 ===================== -->
+  <main class="step" id="s3">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <h2>Estimasi Parameter Pasar & Distribusi Sampel</h2>
+    </div>
+
+    <div class="card">
+      <h3>📈 Simulasi Confidence Interval Pengeluaran Bulanan</h3>
+      <div class="ctrl-row"><span class="ctrl-label">Rata-rata sampel (x̄, Rp ribu)</span><input type="range" min="300" max="800" step="10" value="525" id="ciMu" oninput="updCI()"><span class="ctrl-val" id="ciMu-v">525</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">Std. Deviasi populasi (σ, Rp ribu)</span><input type="range" min="50" max="300" step="10" value="130" id="ciSig" oninput="updCI()"><span class="ctrl-val" id="ciSig-v">130</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">Ukuran sampel (n)</span><input type="range" min="30" max="500" step="10" value="100" id="ciN" oninput="updCI()"><span class="ctrl-val" id="ciN-v">100</span></div>
+      
+      <div class="card-row-4" style="margin-top:20px;">
+        <div class="metric"><div class="metric-label">Std. Error (σ/√n)</div><div class="metric-value" id="ciSE" style="font-size:18px;">—</div><div class="metric-sub">Rp ribu</div></div>
+        <div class="metric"><div class="metric-label">CI 90% (z=1.64)</div><div class="metric-value" id="ci90" style="font-size:14px; margin-top:8px;">—</div></div>
+        <div class="metric" style="background:var(--info-bg); border-color:rgba(59, 130, 246, 0.3);"><div class="metric-label" style="color:var(--info);">CI 95% (z=1.96)</div><div class="metric-value" id="ci95" style="font-size:14px; margin-top:8px; color:var(--info);">—</div></div>
+        <div class="metric"><div class="metric-label">CI 99% (z=2.58)</div><div class="metric-value" id="ci99" style="font-size:14px; margin-top:8px;">—</div></div>
+      </div>
+
+      <div class="formula-box" id="ci-fb"></div>
+      
+      <h3 style="margin-top:24px;">Pengaruh Ukuran Sampel terhadap Presisi (Lebar CI 95%)</h3>
+      <div style="position:relative;height:220px"><canvas id="ciChart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h3>🎯 Penetapan Jumlah Sampel Minimum untuk Survei</h3>
+      <div class="ctrl-row"><span class="ctrl-label">Target Margin of Error (E, Rp ribu)</span><input type="range" min="5" max="50" step="5" value="20" id="ciE" oninput="updSampleSize()"><span class="ctrl-val" id="ciE-v">20</span></div>
+      
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead><tr><th>Tingkat Kepercayaan</th><th>Nilai z</th><th>n Minimum</th><th>Aksi Riset Pasar</th></tr></thead>
+          <tbody id="ssTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== STEP 5 ===================== -->
+  <main class="step" id="s4">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <h2>Analisis Korelasi Produk & Cross-Selling</h2>
+    </div>
+
+    <div class="card">
+      <h3>📦 Tabel Probabilitas Gabungan (Joint Probability): Elektronik & Asuransi</h3>
+      <div class="ctrl-row"><span class="ctrl-label">P(Beli Elektronik)</span><input type="range" min="10" max="60" step="1" value="35" id="cPx" oninput="updCorr()"><span class="ctrl-val" id="cPx-v">0.35</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">P(Beli Asuransi | Beli Elektronik)</span><input type="range" min="10" max="90" step="1" value="60" id="cPyx" oninput="updCorr()"><span class="ctrl-val" id="cPyx-v">0.60</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">P(Beli Asuransi | Tidak Beli Elek.)</span><input type="range" min="1" max="40" step="1" value="10" id="cPynx" oninput="updCorr()"><span class="ctrl-val" id="cPynx-v">0.10</span></div>
+
+      <div class="table-wrap" style="margin-top:16px;">
+        <table id="jpTable">
+          <thead><tr><th>Skenario</th><th>Beli Asuransi (Y)</th><th>Tidak Asuransi (Y')</th><th>Marginal P(X)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Beli Elektronik (X)</strong></td><td id="j11" style="color:var(--success); font-weight:600;">—</td><td id="j10">—</td><td id="jpx1" style="font-weight:600;">—</td></tr>
+            <tr><td><strong>Tidak Elektronik (X')</strong></td><td id="j01">—</td><td id="j00">—</td><td id="jpx0" style="font-weight:600;">—</td></tr>
+            <tr class="highlight"><td><strong>Marginal P(Y)</strong></td><td id="jpy1" style="font-weight:600;">—</td><td id="jpy0" style="font-weight:600;">—</td><td><strong>1.0000</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-row-4">
+      <div class="metric"><div class="metric-label">E[X] Elektronik</div><div class="metric-value" id="cEX">—</div></div>
+      <div class="metric"><div class="metric-label">E[Y] Asuransi</div><div class="metric-value" id="cEY">—</div></div>
+      <div class="metric"><div class="metric-label">Kovarians Cov(X,Y)</div><div class="metric-value" id="cCov" style="font-size:20px; margin-top:4px;">—</div></div>
+      <div class="metric" style="background:var(--success-bg); border-color:rgba(16, 185, 129, 0.3);"><div class="metric-label" style="color:var(--success);">Korelasi ρ(X,Y)</div><div class="metric-value" id="cCorr" style="color:var(--success); font-size:20px; margin-top:4px;">—</div></div>
+    </div>
+
+    <div class="conclusion-box" style="text-align:center; padding: 12px;">
+      Strategi Promosi Bundling: <strong id="cRec" style="font-size:16px;">—</strong>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3>📊 Visualisasi Kekuatan Asosiasi Pembelian</h3>
+      <div style="position:relative;height:250px"><canvas id="corrChart"></canvas></div>
+    </div>
+
+    <div class="formula-box">
+      <span class="eq">Kovarians: Cov(X,Y) = E[XY] − E[X]·E[Y]</span><br>
+      <span class="eq">Korelasi: ρ = Cov(X,Y) / (σ_x · σ_y)</span><br>
+      Rentang nilai ρ adalah -1 hingga +1. Jika ρ positif dan besar, fitur "Frequently Bought Together" atau bundling diskon akan sangat efektif meningkatkan <em>Average Order Value (AOV)</em>.
+    </div>
+  </main>
+
+  <!-- ===================== STEP 6 ===================== -->
+  <main class="step" id="s5">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <h2>Mitigasi Risiko Kapasitas Server (Teorema Chebyshev)</h2>
+    </div>
+
+    <div class="card">
+      <h3>⚡ Parameter Beban Trafik Event Flash Sale</h3>
+      <div class="ctrl-row"><span class="ctrl-label">Rata-rata kunjungan/detik (μ)</span><input type="range" min="5000" max="50000" step="1000" value="10000" id="chMu" oninput="updCheby2()"><span class="ctrl-val" id="chMu-v">10.000</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">Standar Deviasi fluktuasi (σ)</span><input type="range" min="500" max="10000" step="500" value="2000" id="chSig" oninput="updCheby2()"><span class="ctrl-val" id="chSig-v">2.000</span></div>
+      <div class="ctrl-row"><span class="ctrl-label">Target Jaminan Uptime SLA (%)</span><input type="range" min="50" max="99" step="1" value="75" id="chPct" oninput="updCheby2()"><span class="ctrl-val" id="chPct-v">75%</span></div>
+      
+      <div class="card-row-3" style="margin-top:20px; margin-bottom:0;">
+        <div class="metric"><div class="metric-label">Faktor k Chebyshev</div><div class="metric-value" id="chK">—</div><div class="metric-sub">k = 1/√(1−p)</div></div>
+        <div class="metric"><div class="metric-label">Buffer Ekstra Dibutuhkan</div><div class="metric-value" id="chBuffer">—</div><div class="metric-sub">req/s di atas rata-rata</div></div>
+        <div class="metric" style="background:var(--danger-bg); border-color:rgba(239, 68, 68, 0.3);"><div class="metric-label" style="color:var(--danger);">Kapasitas Wajib Server</div><div class="metric-value" id="chUpper" style="color:var(--danger);">—</div><div class="metric-sub">Batas atas (μ + kσ)</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📈 Perbandingan Kebutuhan Kapasitas: Chebyshev vs Normal</h3>
+      <div style="position:relative;height:250px; margin-bottom: 20px;"><canvas id="chChart"></canvas></div>
+      
+      <div class="table-wrap">
+        <table id="chTbl">
+          <thead><tr><th>Jaminan Uptime</th><th>Faktor k</th><th>Interval Beban (req/s)</th><th>Kapasitas Disiapkan</th><th>Status Infrastruktur</th></tr></thead>
+          <tbody id="chTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="formula-box">
+      <span class="eq">P(|X − μ| &lt; kσ) ≥ 1 − 1/k²</span><br>
+      Karena distribusi beban trafik internet (burst traffic) sering kali menceng (skewed) dan tidak normal, Teorema Chebyshev memberikan perlindungan estimasi yang <em>konservatif namun pasti aman</em>.
+    </div>
+
+    <div class="conclusion-box">
+      🚀 <strong>Rekomendasi DevOps:</strong> Provisikan infrastruktur untuk menangani <strong id="chFinal">—</strong> req/detik guna memastikan SLA <span id="chPctFinal">75%</span> terpenuhi saat Flash Sale. Setel sistem <em>auto-scaling</em> agar memicu penambahan node saat trafik menyentuh ambang <strong id="chTrigger">—</strong> req/detik.
+    </div>
+  </main>
+</div>
+
+<script>
+// UI State Management
+const steps = document.querySelectorAll('.step'), nbs = document.querySelectorAll('.nav-btn');
+function showStep(i){
+  steps.forEach((s,j) => s.classList.toggle('active', i===j));
+  nbs.forEach((b,j) => b.classList.toggle('active', i===j));
+}
+
+// Global Chart settings based on CSS variables
+const style = getComputedStyle(document.body);
+Chart.defaults.font.family = style.getPropertyValue('--font-sans');
+Chart.defaults.color = style.getPropertyValue('--text-secondary');
+const gridColor = 'rgba(156, 163, 175, 0.2)';
+
+const baseOpts = (xLabel,yLabel) => ({
+  responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+  scales: {
+    x: { title: { display: !!xLabel, text: xLabel }, grid: { display: false } },
+    y: { title: { display: !!yLabel, text: yLabel }, grid: { color: gridColor } }
+  }
+});
+
+function fmtN(v,d=0){ return Number(v).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+
+// --- STEP 1: Skala Data ---
+new Chart(document.getElementById('tierChart'),{
+  type: 'doughnut',
+  data: { labels: ['Bronze','Silver','Gold','Platinum'], datasets: [{ data: [55,28,12,5], backgroundColor: ['#9ca3af','#3b82f6','#f59e0b','#10b981'], borderWidth: 0 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '70%' }
+});
+
+new Chart(document.getElementById('pmChart'),{
+  type: 'doughnut',
+  data: { labels: ['E-wallet','Transfer','Kartu Kredit','COD'], datasets: [{ data: [42,31,18,9], backgroundColor: ['#8b5cf6','#3b82f6','#10b981','#ef4444'], borderWidth: 0 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '70%' }
+});
+
+// --- STEP 2: Probabilitas Konversi ---
+function updPromo(){
+  const a = +document.getElementById('prA').value, b = +document.getElementById('prB').value;
+  document.getElementById('prA-v').textContent = a; document.getElementById('prB-v').textContent = b;
+  const cA = Math.pow(26,a), cB = Math.pow(10,b);
+  document.getElementById('pA').textContent = fmtN(cA); document.getElementById('pB').textContent = fmtN(cB); document.getElementById('pC').textContent = fmtN(cA*cB);
+} updPromo();
+
+let bC2 = null;
+function updBayes2(){
+  const op = +document.getElementById('bOpen').value/100, buyO = +document.getElementById('bBuyO').value/100, buyN = +document.getElementById('bBuyN').value/100;
+  document.getElementById('bOpen-v').textContent = (op*100).toFixed(0)+'%'; document.getElementById('bBuyO-v').textContent = (buyO*100).toFixed(0)+'%'; document.getElementById('bBuyN-v').textContent = (buyN*100).toFixed(0)+'%';
+  
+  const pBuy = buyO*op + buyN*(1-op), post = (buyO*op)/pBuy, lift = buyO/buyN;
+  document.getElementById('bPbuy').textContent = (pBuy*100).toFixed(1)+'%'; document.getElementById('bPost').textContent = (post*100).toFixed(1)+'%'; document.getElementById('bLift').textContent = lift.toFixed(1)+'×';
+  
+  document.getElementById('bayes2-fb').innerHTML = `<span class="eq">P(Beli Total) = P(Beli|Buka)·P(Buka) + P(Beli|Abaikan)·P(Abaikan)</span><br><span class="eq">= ${(buyO*100).toFixed(0)}% × ${(op*100).toFixed(0)}% + ${(buyN*100).toFixed(0)}% × ${((1-op)*100).toFixed(0)}% = <strong>${(pBuy*100).toFixed(2)}%</strong></span><br><br><span class="eq">Bayes: P(Buka|Beli) = P(Beli|Buka)·P(Buka) / P(Beli) = <strong>${(post*100).toFixed(2)}%</strong></span><br>Artinya, dari seluruh pengguna yang akhirnya melakukan pembelian, ${(post*100).toFixed(0)}% di antaranya terkonversi <em>karena</em> membuka notifikasi tersebut.`;
+  
+  if(bC2) bC2.destroy();
+  bC2 = new Chart(document.getElementById('bayesChart2'),{
+    type: 'bar',
+    data: { labels: ['P(Beli | Buka)', 'P(Beli | Abaikan)', 'P(Beli) Total', 'P(Buka | Sudah Beli)'],
+            datasets: [{ data: [buyO*100, buyN*100, pBuy*100, post*100], backgroundColor: ['#10b981','#ef4444','#3b82f6','#f59e0b'], borderRadius: 4 }] },
+    options: { ...baseOpts('', 'Peluang (%)'), scales: { x: { grid: { display: false } }, y: { max: 100, grid: { color: gridColor }, ticks: { callback: v=>v+'%' } } } }
+  });
+} updBayes2();
+
+// --- STEP 3: Loyalitas (Geometrik & Binomial Negatif) ---
+let geoC = null;
+function updGeo(){
+  const p = +document.getElementById('geoP').value/100; document.getElementById('geoP-v').textContent = p.toFixed(2);
+  document.getElementById('gEX').textContent = (1/p).toFixed(1) + ' bln'; document.getElementById('gVar').textContent = ((1-p)/(p*p)).toFixed(1);
+  
+  let cdf3 = 0; for(let k=1; k<=3; k++) cdf3 += Math.pow(1-p,k-1)*p;
+  document.getElementById('gCDF3').textContent = (cdf3*100).toFixed(1) + '%';
+  
+  const labs=[], dat=[]; for(let k=1; k<=12; k++){ labs.push('Bln '+k); dat.push((Math.pow(1-p,k-1)*p*100).toFixed(2)); }
+  if(geoC) geoC.destroy();
+  geoC = new Chart(document.getElementById('geoChart'),{
+    type: 'bar',
+    data: { labels: labs, datasets: [{ data: dat, backgroundColor: '#8b5cf6', borderRadius: 4 }] },
+    options: { ...baseOpts('Bulan ke-k', 'Peluang P(X=k) %'), scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, ticks: { callback: v=>v+'%' } } } }
+  });
+} updGeo();
+
+let nbC = null;
+function updNB(){
+  const k = +document.getElementById('nbK').value, p = +document.getElementById('nbP').value/100;
+  document.getElementById('nbK-v').textContent = k; document.getElementById('nbP-v').textContent = p.toFixed(2);
+  document.getElementById('nbEX').textContent = (k/p).toFixed(1) + ' bln'; document.getElementById('nbVar').textContent = (k*(1-p)/(p*p)).toFixed(1); document.getElementById('nbMed').textContent = Math.ceil(k/p) + ' bln';
+  
+  const labs=[], dat=[]; const comb = (n,r) => { let c=1; for(let i=0;i<r;i++) c=c*(n-i)/(i+1); return c; };
+  const maxN = Math.min(Math.ceil(k/p + 3*Math.sqrt(k*(1-p)/(p*p))), k+20);
+  for(let n=k; n<=maxN; n++){ labs.push('Bln '+n); dat.push((comb(n-1,k-1)*Math.pow(p,k)*Math.pow(1-p,n-k)*100).toFixed(2)); }
+  
+  if(nbC) nbC.destroy();
+  nbC = new Chart(document.getElementById('nbChart'),{
+    type: 'bar',
+    data: { labels: labs, datasets: [{ data: dat, backgroundColor: '#10b981', borderRadius: 4 }] },
+    options: { ...baseOpts('Total bulan hingga target', 'Peluang P(X=n) %'), scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, ticks: { callback: v=>v+'%' } } } }
+  });
+} updNB();
+
+// --- STEP 4: Estimasi Pasar (Confidence Intervals) ---
+let ciC = null;
+function updCI(){
+  const mu = +document.getElementById('ciMu').value, sig = +document.getElementById('ciSig').value, n = +document.getElementById('ciN').value;
+  document.getElementById('ciMu-v').textContent = mu; document.getElementById('ciSig-v').textContent = sig; document.getElementById('ciN-v').textContent = n;
+  
+  const se = sig/Math.sqrt(n); document.getElementById('ciSE').textContent = se.toFixed(2);
+  document.getElementById('ci90').textContent = `${fmtN(mu - 1.645*se,1)} – ${fmtN(mu + 1.645*se,1)}`;
+  document.getElementById('ci95').textContent = `${fmtN(mu - 1.960*se,1)} – ${fmtN(mu + 1.960*se,1)}`;
+  document.getElementById('ci99').textContent = `${fmtN(mu - 2.576*se,1)} – ${fmtN(mu + 2.576*se,1)}`;
+  
+  document.getElementById('ci-fb').innerHTML = `<span class="eq">Standar Error (SE) = σ / √n = ${sig} / √${n} = ${se.toFixed(2)} ribu</span><br>Pernyataan Bisnis: "Berdasarkan data sampel, kita yakin 95% bahwa rata-rata pengeluaran seluruh pelanggan kita sesungguhnya berada di rentang <strong>Rp ${fmtN(mu-1.96*se,0)}.000 hingga Rp ${fmtN(mu+1.96*se,0)}.000</strong> per bulan."`;
+  
+  const ns = [30,50,100,150,200,300,500], widths = ns.map(ni => parseFloat((2*1.96*sig/Math.sqrt(ni)).toFixed(2)));
+  if(ciC) ciC.destroy();
+  ciC = new Chart(document.getElementById('ciChart'),{
+    type: 'line',
+    data: { labels: ns, datasets: [{ label: 'Lebar CI', data: widths, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 4 }] },
+    options: { ...baseOpts('Ukuran Sampel (n)', 'Lebar Margin of Error Total'), scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } } }
+  });
+  updSampleSize();
+} updCI();
+
+function updSampleSize(){
+  const sig = +document.getElementById('ciSig').value, E = +document.getElementById('ciE').value;
+  document.getElementById('ciE-v').textContent = E;
+  const tb = document.getElementById('ssTbody'); tb.innerHTML = '';
+  [{l:'90%',z:1.645},{l:'95%',z:1.960},{l:'99%',z:2.576}].forEach(r => {
+    const n = Math.ceil(Math.pow(r.z*sig/E, 2));
+    tb.innerHTML += `<tr class="${r.l==='95%'?'highlight':''}"><td>${r.l}</td><td>${r.z}</td><td style="font-weight:700">${fmtN(n)}</td><td>Targetkan survei ke ${fmtN(n)} user acak</td></tr>`;
+  });
+}
+
+// --- STEP 5: Korelasi Produk ---
+let cC = null;
+function updCorr(){
+  const px = +document.getElementById('cPx').value/100, pyx = +document.getElementById('cPyx').value/100, pynx = +document.getElementById('cPynx').value/100;
+  document.getElementById('cPx-v').textContent = px.toFixed(2); document.getElementById('cPyx-v').textContent = pyx.toFixed(2); document.getElementById('cPynx-v').textContent = pynx.toFixed(2);
+  
+  const j11 = px*pyx, j10 = px*(1-pyx), j01 = (1-px)*pynx, j00 = (1-px)*(1-pynx), py = j11+j01;
+  document.getElementById('j11').textContent = j11.toFixed(4); document.getElementById('j10').textContent = j10.toFixed(4);
+  document.getElementById('j01').textContent = j01.toFixed(4); document.getElementById('j00').textContent = j00.toFixed(4);
+  document.getElementById('jpx1').textContent = px.toFixed(4); document.getElementById('jpx0').textContent = (1-px).toFixed(4);
+  document.getElementById('jpy1').textContent = py.toFixed(4); document.getElementById('jpy0').textContent = (1-py).toFixed(4);
+  
+  const cov = j11 - (px*py), corr = cov / (Math.sqrt(px*(1-px)) * Math.sqrt(py*(1-py)));
+  document.getElementById('cEX').textContent = px.toFixed(3); document.getElementById('cEY').textContent = py.toFixed(3);
+  document.getElementById('cCov').textContent = cov.toFixed(4); document.getElementById('cCorr').textContent = corr.toFixed(3);
+  
+  const recEl = document.getElementById('cRec');
+  recEl.textContent = corr > 0.4 ? '🔥 Sangat Direkomendasikan' : corr > 0.2 ? '✅ Direkomendasikan' : corr > 0 ? '🤔 Bisa Dipertimbangkan' : '❌ Tidak Efektif';
+  recEl.style.color = corr > 0.4 ? 'var(--success)' : corr > 0.2 ? 'var(--info)' : corr > 0 ? 'var(--warning)' : 'var(--danger)';
+  
+  if(cC) cC.destroy();
+  cC = new Chart(document.getElementById('corrChart'),{
+    type: 'bar',
+    data: { labels: ['Beli Keduanya', 'Elektronik Saja', 'Asuransi Saja', 'Tidak Beli Keduanya'],
+            datasets: [{ data: [j11*100, j10*100, j01*100, j00*100], backgroundColor: ['#10b981','#3b82f6','#f59e0b','#9ca3af'], borderRadius: 4 }] },
+    options: { ...baseOpts('', 'Joint Probability (%)'), scales: { x: { grid: { display: false } }, y: { max: 100, grid: { color: gridColor }, ticks: { callback: v=>v+'%' } } } }
+  });
+} updCorr();
+
+// --- STEP 6: Chebyshev Server Capacity ---
+let chC = null;
+function normalCDF(k) { const t=1/(1+0.2316419*k),poly=t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429)))); return 1-(1/Math.sqrt(2*Math.PI))*Math.exp(-0.5*k*k)*poly; }
+
+function updCheby2(){
+  const mu = +document.getElementById('chMu').value, sig = +document.getElementById('chSig').value, pct = +document.getElementById('chPct').value/100;
+  document.getElementById('chMu-v').textContent = fmtN(mu); document.getElementById('chSig-v').textContent = fmtN(sig); document.getElementById('chPct-v').textContent = (pct*100)+'%';
+  
+  const k = Math.sqrt(1/(1-pct)), upper = Math.round(mu+k*sig);
+  document.getElementById('chK').textContent = k.toFixed(2); document.getElementById('chBuffer').textContent = '+' + fmtN(Math.round(k*sig));
+  document.getElementById('chUpper').textContent = fmtN(upper); document.getElementById('chFinal').textContent = fmtN(upper);
+  document.getElementById('chPctFinal').textContent = (pct*100)+'%'; document.getElementById('chTrigger').textContent = fmtN(mu+sig);
+  
+  const tb = document.getElementById('chTbody'); tb.innerHTML = '';
+  [0.50, 0.75, 0.89, 0.94].forEach(p => {
+    const kk = Math.sqrt(1/(1-p)), up = Math.round(mu+kk*sig);
+    const badge = up < 15000 ? 'badge-success">Aman' : up < 25000 ? 'badge-warning">Skala Sedang' : 'badge-danger">Kritis (Auto-Scale)';
+    tb.innerHTML += `<tr class="${Math.abs(p-pct)<0.01?'highlight':''}"><td>${(p*100).toFixed(0)}%</td><td>${kk.toFixed(2)}</td><td>${fmtN(Math.round(mu-kk*sig))} – ${fmtN(up)}</td><td style="font-weight:700">${fmtN(up)}</td><td><span class="badge ${badge}</span></td></tr>`;
+  });
+  
+  const ps = [0.5, 0.6, 0.7, 0.75, 0.8, 0.89, 0.94], chebCap = ps.map(p => Math.round(mu + Math.sqrt(1/(1-p))*sig));
+  const normCap = ps.map(p => { let lo=0,hi=10; for(let i=0;i<50;i++){ let m=(lo+hi)/2; if(normalCDF(m)<p)lo=m; else hi=m; } return Math.round(mu+((lo+hi)/2)*sig); });
+  
+  if(chC) chC.destroy();
+  chC = new Chart(document.getElementById('chChart'),{
+    type: 'line',
+    data: { labels: ps.map(p=>(p*100)+'%'), datasets: [
+      { label: 'Estimasi Chebyshev (Aman)', data: chebCap, borderColor: '#ef4444', borderDash: [5,5], tension: 0.3, pointRadius: 4 },
+      { label: 'Distribusi Normal (Risiko)', data: normCap, borderColor: '#10b981', tension: 0.3, pointRadius: 4 }
+    ]},
+    options: { ...baseOpts('Target Jaminan Uptime (%)', 'Kapasitas Server (req/s)'), plugins: { legend: { display: true, position: 'bottom' } }, scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } } }
+  });
+} updCheby2();
+</script>
+</body>
+</html>
